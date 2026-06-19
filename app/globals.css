@@ -1,0 +1,335 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
+/* ══════════════════════════════════════════════════════
+   @property — 注册天空渐变色标为 <color> 类型，
+   使浏览器能在 light/dark 之间平滑插值渐变
+   ══════════════════════════════════════════════════════ */
+@property --sky-c1 { syntax: '<color>'; initial-value: #9772B9; inherits: true; }
+@property --sky-c2 { syntax: '<color>'; initial-value: #A07AB0; inherits: true; }
+@property --sky-c3 { syntax: '<color>'; initial-value: #AD7E9E; inherits: true; }
+@property --sky-c4 { syntax: '<color>'; initial-value: #C8869A; inherits: true; }
+@property --sky-c5 { syntax: '<color>'; initial-value: #D48E96; inherits: true; }
+@property --sky-c6 { syntax: '<color>'; initial-value: #D8928C; inherits: true; }
+@property --sky-c7 { syntax: '<color>'; initial-value: #DF947F; inherits: true; }
+@property --sky-c8 { syntax: '<color>'; initial-value: #F0B472; inherits: true; }
+@property --sky-c9 { syntax: '<color>'; initial-value: #F2BC84; inherits: true; }
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Space Grotesk', sans-serif;
+  background: transparent;
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ══════════════════════════════════════════════════════
+   日夜模式 CSS 变量
+   ══════════════════════════════════════════════════════ */
+:root {
+  /* ── 天空主渐变（通过 @property 可平滑过渡） ── */
+  --sky-c1: #9772B9;
+  --sky-c2: #A07AB0;
+  --sky-c3: #AD7E9E;
+  --sky-c4: #C8869A;
+  --sky-c5: #D48E96;
+  --sky-c6: #D8928C;
+  --sky-c7: #DF947F;
+  --sky-c8: #F0B472;
+  --sky-c9: #F2BC84;
+
+  /* ── 弥散光源色标 ── */
+  --glow-left-start: rgba(240, 145, 118, 0.28);
+  --glow-left-mid: rgba(225, 128, 108, 0.14);
+  --glow-left-end: rgba(210, 110, 95, 0.04);
+  --glow-right-start: rgba(238, 143, 120, 0.26);
+  --glow-right-mid: rgba(222, 128, 110, 0.13);
+  --glow-right-end: rgba(208, 108, 95, 0.04);
+  --glow-ct-start: rgba(240, 195, 175, 0.24);
+  --glow-ct-mid: rgba(225, 170, 152, 0.12);
+  --glow-ct-end: rgba(210, 150, 135, 0.03);
+  --glow-cb-start: rgba(248, 215, 155, 0.3);
+  --glow-cb-mid: rgba(242, 190, 125, 0.16);
+  --glow-cb-end: rgba(235, 170, 105, 0.05);
+  --glow-purple-start: rgba(155, 125, 200, 0.2);
+  --glow-purple-mid: rgba(138, 108, 185, 0.09);
+  --glow-purple-end: rgba(120, 90, 168, 0.02);
+
+  /* ── 静态封面云（SkyBackground 内） ── */
+  --cloud-a: rgba(228, 220, 242, 0.26);
+  --cloud-b: rgba(242, 234, 240, 0.24);
+  --cloud-c: rgba(245, 235, 228, 0.22);
+  --cloud-d: rgba(248, 238, 225, 0.26);
+
+  /* ── 胶片颗粒 ── */
+  --grain-opacity: 0.12;
+
+  /* ── 动态云朵（Components/Clouds.tsx） ── */
+  --cloud-core-start: rgba(255, 250, 245, 0.7);
+  --cloud-core-mid: rgba(245, 235, 250, 0.5);
+  --cloud-edge-glow: rgba(196, 181, 253, 0.3);
+  --cloud-particle: rgba(245, 235, 245, 0.25);
+  --cloud-blur: 0.6px;
+  --cloud-opacity-base: 0.85;
+
+  /* ── 灵感云气泡 ── */
+  --insp-cloud-core-start: rgba(255, 250, 245, 0.65);
+  --insp-cloud-core-mid: rgba(248, 238, 252, 0.45);
+  --insp-cloud-edge-glow: rgba(196, 181, 253, 0.28);
+  --insp-text-color: rgba(255, 245, 235, 0.95);
+  --insp-text-shadow: 0 0 12px rgba(255, 200, 140, 0.3), 0 0 2px rgba(255, 255, 255, 0.4);
+
+  /* ── 标题 ── */
+  --title-color: #ffffff;
+  --title-shadow: 0 4px 60px rgba(200, 180, 255, 0.18), 0 0 2px rgba(255, 255, 255, 0.5);
+
+  /* ── 正文 ── */
+  --text-primary: rgba(255, 255, 255, 0.85);
+  --text-secondary: rgba(255, 255, 255, 0.70);
+  --text-muted: rgba(255, 255, 255, 0.50);
+  --text-extra-muted: rgba(255, 255, 255, 0.35);
+
+  /* ── 导航 ── */
+  --nav-text: rgba(255, 255, 255, 0.50);
+  --nav-hover: rgba(255, 255, 255, 0.85);
+  --nav-underline: rgba(255, 255, 255, 0.40);
+
+  /* ── 按钮 ── */
+  --btn-border: rgba(255, 255, 255, 0.35);
+  --btn-text: rgba(255, 255, 255, 0.85);
+  --btn-bg: rgba(255, 255, 255, 0.04);
+  --btn-hover-bg: rgba(255, 255, 255, 0.15);
+  --btn-hover-border: rgba(255, 255, 255, 0.6);
+
+  /* ── 二维码气泡 ── */
+  --bubble-bg: linear-gradient(
+    135deg,
+    rgba(80, 50, 130, 0.5) 0%,
+    rgba(160, 100, 150, 0.42) 40%,
+    rgba(210, 140, 100, 0.36) 100%
+  );
+  --bubble-border: rgba(255, 255, 255, 0.18);
+  --bubble-text: rgba(255, 255, 255, 0.55);
+
+  /* ── 女孩角色 ── */
+  --girl-glow-1: rgba(255, 200, 80, 0.45);
+  --girl-glow-2: rgba(255, 180, 50, 0.35);
+  --girl-glow-3: rgba(255, 160, 40, 0.25);
+  --girl-glow-4: rgba(255, 140, 30, 0.18);
+  --girl-shadow: rgba(100, 60, 30, 0.2);
+
+  /* ── 个性纸飞机（红色） ── */
+  --plane-red-start: #FF4500;
+  --plane-red-mid: #e83020;
+  --plane-red-end: #a01010;
+
+  /* ── 个性纸飞机（粉紫色） ── */
+  --plane-pink-start: #FFF5F5;
+  --plane-pink-mid: #FFF0F0;
+  --plane-pink-end: #FADADD;
+  --plane-pink-dark-mid: #F2C8CC;
+  --plane-pink-dark-end: #E8B8BE;
+
+  /* ── 鼠标拖尾 ── */
+  --trail-color: rgba(255, 255, 255, 0.55);
+
+  /* ── 二维码日夜切换 ── */
+  --qr-day-display: block;
+  --qr-night-display: none;
+
+  /* ── 主题切换按钮 ── */
+  --toggle-bg: #FDB813;
+  --toggle-ray-color: #FDB813;
+  --toggle-sun-opacity: 1;
+  --toggle-moon-opacity: 0;
+
+  /* ── 大云朵背景 ── */
+  --bg-cloud-color: rgba(255,250,245,0.18);
+  --bg-cloud-display: block;
+
+  /* ── 星空 ── */
+  --star-color: rgba(255,255,255,0);
+  --stars-display: none;
+
+
+}
+
+/* ══════════════════════════════════════════════════════
+   DARK 模式变量覆写
+   ══════════════════════════════════════════════════════ */
+[data-theme="dark"] {
+  /* ── 天空主渐变（墨紫 → 夜空蓝） ── */
+  --sky-c1: #12101F;
+  --sky-c2: #151326;
+  --sky-c3: #18172E;
+  --sky-c4: #1C1B36;
+  --sky-c5: #1F1F3E;
+  --sky-c6: #222346;
+  --sky-c7: #25284E;
+  --sky-c8: #282D56;
+  --sky-c9: #2B325E;
+
+  /* 弥散光源 → 冷蓝暗光（alpha 降低 30%~50%） */
+  --glow-left-start: rgba(70, 110, 180, 0.08);
+  --glow-left-mid: rgba(60, 95, 160, 0.05);
+  --glow-left-end: rgba(50, 80, 140, 0.01);
+  --glow-right-start: rgba(70, 110, 180, 0.08);
+  --glow-right-mid: rgba(60, 95, 160, 0.04);
+  --glow-right-end: rgba(50, 80, 140, 0.01);
+  --glow-ct-start: rgba(65, 90, 155, 0.07);
+  --glow-ct-mid: rgba(55, 75, 135, 0.04);
+  --glow-ct-end: rgba(45, 60, 115, 0.01);
+  --glow-cb-start: rgba(55, 80, 140, 0.08);
+  --glow-cb-mid: rgba(45, 65, 120, 0.05);
+  --glow-cb-end: rgba(35, 50, 100, 0.01);
+  --glow-purple-start: rgba(70, 85, 155, 0.06);
+  --glow-purple-mid: rgba(60, 70, 135, 0.03);
+  --glow-purple-end: rgba(50, 55, 110, 0.01);
+
+  /* 封面云 → 暗蓝紫半透明 */
+  --cloud-a: rgba(80, 100, 160, 0.12);
+  --cloud-b: rgba(90, 110, 165, 0.11);
+  --cloud-c: rgba(75, 95, 150, 0.10);
+  --cloud-d: rgba(85, 105, 155, 0.11);
+
+  --grain-opacity: 0.04;
+
+  /* 动态云朵 */
+  --cloud-core-start: rgba(160, 185, 230, 0.45);
+  --cloud-core-mid: rgba(135, 160, 220, 0.30);
+  --cloud-edge-glow: rgba(110, 140, 210, 0.16);
+  --cloud-particle: rgba(145, 165, 220, 0.10);
+  --cloud-blur: 1.8px;
+  --cloud-opacity-base: 0.55;
+
+  /* 灵感云 */
+  --insp-cloud-core-start: rgba(160, 185, 230, 0.40);
+  --insp-cloud-core-mid: rgba(135, 160, 220, 0.28);
+  --insp-cloud-edge-glow: rgba(110, 140, 210, 0.14);
+  --insp-text-color: rgba(200, 215, 245, 0.90);
+  --insp-text-shadow: 0 0 12px rgba(120, 160, 230, 0.25), 0 0 2px rgba(200, 215, 255, 0.35);
+
+  /* 标题 */
+  --title-color: rgba(220, 230, 255, 0.95);
+  --title-shadow: 0 4px 60px rgba(100, 130, 220, 0.15), 0 0 2px rgba(200, 210, 255, 0.35);
+
+  /* 正文 */
+  --text-primary: rgba(200, 215, 240, 0.85);
+  --text-secondary: rgba(195, 210, 240, 0.65);
+  --text-muted: rgba(180, 195, 230, 0.45);
+  --text-extra-muted: rgba(170, 185, 220, 0.30);
+
+  /* 导航 */
+  --nav-text: rgba(180, 195, 225, 0.45);
+  --nav-hover: rgba(210, 225, 250, 0.85);
+  --nav-underline: rgba(190, 205, 240, 0.40);
+
+  /* 按钮 */
+  --btn-border: rgba(180, 200, 240, 0.30);
+  --btn-text: rgba(200, 215, 240, 0.85);
+  --btn-bg: rgba(180, 200, 240, 0.05);
+  --btn-hover-bg: rgba(180, 200, 240, 0.14);
+  --btn-hover-border: rgba(190, 210, 250, 0.55);
+
+  /* 气泡 */
+  --bubble-bg: linear-gradient(
+    135deg,
+    rgba(25, 35, 70, 0.6) 0%,
+    rgba(45, 55, 95, 0.5) 40%,
+    rgba(60, 70, 110, 0.42) 100%
+  );
+  --bubble-border: rgba(130, 150, 210, 0.14);
+  --bubble-text: rgba(180, 195, 230, 0.50);
+
+  /* 女孩角色 */
+  --girl-glow-1: rgba(100, 140, 220, 0.30);
+  --girl-glow-2: rgba(85, 120, 200, 0.22);
+  --girl-glow-3: rgba(70, 100, 180, 0.15);
+  --girl-glow-4: rgba(60, 85, 160, 0.10);
+  --girl-shadow: rgba(30, 40, 80, 0.25);
+
+  /* 纸飞机（红色→冷玫红） */
+  --plane-red-start: #C44569;
+  --plane-red-mid: #A83258;
+  --plane-red-end: #6B1D3A;
+
+  /* 纸飞机（粉色→暗薰衣草） */
+  --plane-pink-start: #D8D0E8;
+  --plane-pink-mid: #C8BED8;
+  --plane-pink-end: #B0A0C8;
+  --plane-pink-dark-mid: #A898C0;
+  --plane-pink-dark-end: #9888B0;
+
+  /* 拖尾 */
+  --trail-color: rgba(180, 200, 240, 0.45);
+
+  /* 二维码日夜切换 */
+  --qr-day-display: none;
+  --qr-night-display: block;
+
+  /* 主题按钮 */
+  --toggle-bg: #C8D6F0;
+  --toggle-ray-color: #C8D6F0;
+  --toggle-sun-opacity: 0;
+  --toggle-moon-opacity: 1;
+
+  /* ── 大云朵背景（夜间） ── */
+  --bg-cloud-color: rgba(160,185,230,0.06);
+  --bg-cloud-display: block;
+
+  /* ── 星空 ── */
+  --star-color: rgba(220,230,255,0.3);
+  --stars-display: block;
+
+
+}
+
+/* ══════════════════════════════════════════════════════
+   全局 0.5s 过渡：仅针对颜色相关属性，不动 transform/opacity
+   （避免干扰 Framer Motion 等动画库）
+   ══════════════════════════════════════════════════════ */
+html, body, div, header, main, section, nav, footer,
+h1, h2, h3, h4, h5, h6, p, span, a, button, label, li, ul, ol {
+  transition: background-color 0.5s ease-in-out,
+              color 0.5s ease-in-out,
+              border-color 0.5s ease-in-out,
+              box-shadow 0.5s ease-in-out,
+              fill 0.5s ease-in-out,
+              stroke 0.5s ease-in-out;
+}
+
+/* ══════════════════════════════════════════════════════
+   按钮
+   ══════════════════════════════════════════════════════ */
+.btn-outline {
+  border: 1px solid var(--btn-border);
+  color: var(--btn-text);
+  padding: 6px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.6px;
+  backdrop-filter: blur(8px);
+  background: var(--btn-bg);
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.btn-outline:hover {
+  background: var(--btn-hover-bg);
+  color: #fff;
+  border-color: var(--btn-hover-border);
+}
+
+
