@@ -15,6 +15,7 @@ const RAY_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
  */
 export default function ThemeToggle() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [hovered, setHovered] = useState(false);
 
   /* ── 初始化：从 <html data-theme> 读取 ── */
   useEffect(() => {
@@ -53,10 +54,11 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggle}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       aria-label={theme === "light" ? "切换到夜间模式" : "切换到日间模式"}
       title={theme === "light" ? "切换到夜间模式" : "切换到日间模式"}
       style={{
-        /* 与 Header 按钮区对齐 */
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
@@ -64,12 +66,9 @@ export default function ThemeToggle() {
         height: 34,
         marginRight: 10,
         padding: 4,
-        borderRadius: 20,
-        border: "1px solid var(--btn-border)",
-        background: "var(--btn-bg)",
-        backdropFilter: "blur(8px)",
+        background: "transparent",
+        border: "none",
         cursor: "pointer",
-        transition: "background-color 0.5s ease-in-out, border-color 0.5s ease-in-out",
       }}
     >
       <svg
@@ -78,7 +77,11 @@ export default function ThemeToggle() {
         viewBox="0 0 44 44"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        style={{ display: "block" }}
+        style={{
+          display: "block",
+          transition: "transform 0.25s cubic-bezier(0.34, 1.2, 0.64, 1)",
+          transform: hovered ? "scale(1.12)" : "scale(1)",
+        }}
       >
         {/* ── 太阳光芒（8 条射线） ── */}
         <g

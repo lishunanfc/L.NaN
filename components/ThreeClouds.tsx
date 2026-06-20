@@ -103,9 +103,9 @@ interface BubbleDef {
 const BUBBLE_DEFS: BubbleDef[] = [
   { radius: 1.575, posX: -5.2, posY: -2.5, posZ: -0.2, animated: true,  entranceDelay: 0.3, floatAmp: 0.35, floatSpeed: 0.65, opacityScale: 0.82 },
   { radius: 1.425, posX: -2.0, posY: 0.2,  posZ:  0.3, animated: true,  entranceDelay: 1.0, floatAmp: 0.40, floatSpeed: 0.52 },
-  { radius: 0.975, posX: 1.5,  posY: 3.2,  posZ:  0.1, animated: false, entranceDelay: 0,   floatAmp: 0.30, floatSpeed: 0.75 },
-  { radius: 1.2,   posX: 3.0,  posY: 2.0,  posZ: -0.3, animated: false, entranceDelay: 0,   floatAmp: 0.35, floatSpeed: 0.58 },
-  { radius: 1.125, posX: 2.0,  posY: 1.2,  posZ:  0.5, animated: false, entranceDelay: 0,   floatAmp: 0.38, floatSpeed: 0.70 },
+  { radius: 0.975, posX: 1.5,  posY: 3.2,  posZ:  0.1, animated: true,  entranceDelay: 0.08, floatAmp: 0.30, floatSpeed: 0.75 },
+  { radius: 1.2,   posX: 3.0,  posY: 2.0,  posZ: -0.3, animated: true,  entranceDelay: 0.05, floatAmp: 0.35, floatSpeed: 0.58 },
+  { radius: 1.125, posX: 2.0,  posY: 1.2,  posZ:  0.5, animated: true,  entranceDelay: 0.03, floatAmp: 0.38, floatSpeed: 0.70 },
 ];
 
 /* ───────────────────────────────────────────

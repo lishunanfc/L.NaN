@@ -7,9 +7,9 @@ import { useEffect, useRef, useCallback } from "react";
    ────────────────────────────────────────── */
 const CONFIG = {
   /** 拖尾最大历史点数 */
-  TRAIL_MAX_POINTS: 14,
+  TRAIL_MAX_POINTS: 30,
   /** 每个点的存活时间（ms），超出后自动移除 */
-  POINT_LIFETIME: 280,
+  POINT_LIFETIME: 350,
   /** 拖尾头部最大线宽（px） */
   TRAIL_HEAD_WIDTH: 3.2,
   /** 拖尾尾部最小线宽（px） */
@@ -37,9 +37,9 @@ const CONFIG = {
 } as const;
 
 /* ──────────────────────────────────────────
-   粒子颜色池
+   粒子颜色池 —— 日间暖色
    ────────────────────────────────────────── */
-const PARTICLE_COLORS = [
+const PARTICLE_COLORS_DAY = [
   "#EEA47F", // 暖橙
   "#E8926A", // 深暖橙
   "#F0B898", // 浅暖橙
@@ -48,6 +48,20 @@ const PARTICLE_COLORS = [
   "#A382B8", // 深紫
   "#F5E6D3", // 暖白
   "#E8D5F0", // 粉紫白
+];
+
+/* ──────────────────────────────────────────
+   粒子颜色池 —— 夜间冷白流星
+   ────────────────────────────────────────── */
+const PARTICLE_COLORS_NIGHT = [
+  "#FFFFFF", // 纯白
+  "#E0ECFF", // 极淡蓝白
+  "#D0E0FF", // 淡蓝白
+  "#F0E4FF", // 淡紫白
+  "#C4D8FF", // 浅蓝
+  "#DCC8F8", // 淡紫
+  "#FFF2F0", // 暖白星点
+  "#D8E8F8", // 冰蓝
 ];
 
 /* ──────────────────────────────────────────
@@ -74,6 +88,7 @@ export default function CursorTrail() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const trailRef = useRef<TrailPoint[]>([]);
   const particlesRef = useRef<Particle[]>([]);
+  const themeRef = useRef<"light" | "dark">("light");
   const mouseRef = useRef<{ x: number; y: number; moving: boolean }>({
     x: -100,
     y: -100,
@@ -94,6 +109,22 @@ export default function CursorTrail() {
 
   useEffect(() => {
     if (isMobile()) return; // 移动端直接禁用，零开销
+
+    /* ── 主题监听 ── */
+    themeRef.current =
+      (document.documentElement.getAttribute("data-theme") as "light" | "dark") || "light";
+    const themeObserver = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.type === "attributes" && m.attributeName === "data-theme") {
+          themeRef.current =
+            (document.documentElement.getAttribute("data-theme") as "light" | "dark") || "light";
+        }
+      }
+    });
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -146,7 +177,7 @@ export default function CursorTrail() {
             radius:
               CONFIG.PARTICLE_SIZE[0] +
               Math.random() * (CONFIG.PARTICLE_SIZE[1] - CONFIG.PARTICLE_SIZE[0]),
-            color: PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)],
+            color: (themeRef.current === "dark" ? PARTICLE_COLORS_NIGHT : PARTICLE_COLORS_DAY)[Math.floor(Math.random() * (themeRef.current === "dark" ? PARTICLE_COLORS_NIGHT : PARTICLE_COLORS_DAY).length)],
           });
         }
       }
@@ -187,7 +218,28 @@ export default function CursorTrail() {
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
 
-        const total = trail.length;
+        // 快移插值补点：采样点间距 > threshold 时插入中间点
+        const threshold = 16;
+        const renderPoints: typeof trail = [];
+        for (let i = 0; i < trail.length - 1; i++) {
+          renderPoints.push(trail[i]);
+          const dx = trail[i + 1].x - trail[i].x;
+          const dy = trail[i + 1].y - trail[i].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist > threshold) {
+            const steps = Math.ceil(dist / threshold);
+            for (let s = 1; s < steps; s++) {
+              const t = s / steps;
+              renderPoints.push({
+                x: trail[i].x + dx * t,
+                y: trail[i].y + dy * t,
+                time: trail[i].time + (trail[i + 1].time - trail[i].time) * t,
+              });
+            }
+          }
+        }
+        renderPoints.push(trail[trail.length - 1]);
+        const total = renderPoints.length;
 
         // 外发光层（柔和光晕）
         if (CONFIG.TRAIL_GLOW_EXTRA > 0) {
@@ -202,18 +254,22 @@ export default function CursorTrail() {
               CONFIG.TRAIL_GLOW_EXTRA;
 
             ctx.beginPath();
-            ctx.moveTo(trail[i].x, trail[i].y);
+            ctx.moveTo(renderPoints[i].x, renderPoints[i].y);
 
             // 二次贝塞尔通过中点平滑
             if (i < total - 2) {
-              const mx = (trail[i].x + trail[i + 1].x) / 2;
-              const my = (trail[i].y + trail[i + 1].y) / 2;
-              ctx.quadraticCurveTo(trail[i].x, trail[i].y, mx, my);
+              const mx = (renderPoints[i].x + renderPoints[i + 1].x) / 2;
+              const my = (renderPoints[i].y + renderPoints[i + 1].y) / 2;
+              ctx.quadraticCurveTo(renderPoints[i].x, renderPoints[i].y, mx, my);
             } else {
-              ctx.lineTo(trail[i + 1].x, trail[i + 1].y);
+              ctx.lineTo(renderPoints[i + 1].x, renderPoints[i + 1].y);
             }
 
-            ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+            const isDark = themeRef.current === "dark";
+            // 夜间：冷白带淡蓝辉光；日间：暖白辉光
+            ctx.strokeStyle = isDark
+              ? `rgba(180,200,240,${alpha * 1.4})`
+              : `rgba(255,255,255,${alpha})`;
             ctx.lineWidth = width;
             ctx.stroke();
           }
@@ -230,19 +286,40 @@ export default function CursorTrail() {
             (CONFIG.TRAIL_HEAD_WIDTH - CONFIG.TRAIL_TAIL_WIDTH) * (1 - progress);
 
           ctx.beginPath();
-          ctx.moveTo(trail[i].x, trail[i].y);
+          ctx.moveTo(renderPoints[i].x, renderPoints[i].y);
 
           if (i < total - 2) {
-            const mx = (trail[i].x + trail[i + 1].x) / 2;
-            const my = (trail[i].y + trail[i + 1].y) / 2;
-            ctx.quadraticCurveTo(trail[i].x, trail[i].y, mx, my);
+            const mx = (renderPoints[i].x + renderPoints[i + 1].x) / 2;
+            const my = (renderPoints[i].y + renderPoints[i + 1].y) / 2;
+            ctx.quadraticCurveTo(renderPoints[i].x, renderPoints[i].y, mx, my);
           } else {
-            ctx.lineTo(trail[i + 1].x, trail[i + 1].y);
+            ctx.lineTo(renderPoints[i + 1].x, renderPoints[i + 1].y);
           }
 
-          ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+          const isDark2 = themeRef.current === "dark";
+          // 夜间：冷白主线；日间：白色半透主线
+          ctx.strokeStyle = isDark2
+            ? `rgba(220,235,255,${alpha * 1.2})`
+            : `rgba(255,255,255,${alpha})`;
           ctx.lineWidth = width;
           ctx.stroke();
+        }
+
+        // 在每个轨迹点绘制填充小圆点，消除贝塞尔曲线段间的视觉断点
+        for (let i = 0; i < total; i++) {
+          const progress = i / Math.max(total - 1, 1);
+          const alpha = CONFIG.TRAIL_HEAD_ALPHA * (1 - progress);
+          if (alpha <= 0.005) continue;
+          const width =
+            CONFIG.TRAIL_TAIL_WIDTH +
+            (CONFIG.TRAIL_HEAD_WIDTH - CONFIG.TRAIL_TAIL_WIDTH) * (1 - progress);
+          const isDark3 = themeRef.current === "dark";
+          ctx.fillStyle = isDark3
+            ? `rgba(220,235,255,${alpha * 1.2})`
+            : `rgba(255,255,255,${alpha})`;
+          ctx.beginPath();
+          ctx.arc(renderPoints[i].x, renderPoints[i].y, width / 2, 0, Math.PI * 2);
+          ctx.fill();
         }
 
         ctx.restore();
@@ -289,6 +366,7 @@ export default function CursorTrail() {
 
     return () => {
       cancelAnimationFrame(rafRef.current);
+      themeObserver.disconnect();
       window.removeEventListener("mousemove", onMoveWrapper);
       window.removeEventListener("resize", resize);
       clearTimeout(resizeTimeout);

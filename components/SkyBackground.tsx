@@ -9,14 +9,16 @@ import { useMemo } from "react";
  * L1 主渐变 → L2 弥散光源 → L3 星空（仅夜间）→ L4 大云朵 → 月亮（仅夜间）→ L6 胶片颗粒
  */
 export default function SkyBackground() {
-  const stars = useMemo(() => {
-    const arr: { x: number; y: number; r: number; opacity: number }[] = [];
-    for (let i = 0; i < 130; i++) {
+  const twinklingStars = useMemo(() => {
+    const arr: { x: number; y: number; size: number; baseOpacity: number; duration: number; delay: number }[] = [];
+    for (let i = 0; i < 70; i++) {
       arr.push({
         x: Math.random() * 100,
-        y: Math.random() * 60,
-        r: Math.random() * 1.8 + 0.4,
-        opacity: Math.random() * 0.15 + 0.35,
+        y: Math.random() * 55,
+        size: Math.random() * 2 + 1,
+        baseOpacity: Math.random() * 0.4 + 0.3,
+        duration: Math.random() * 2 + 2,
+        delay: Math.random() * 4,
       });
     }
     return arr;
@@ -31,7 +33,6 @@ export default function SkyBackground() {
             <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" stitchTiles="stitch" />
             <feColorMatrix type="matrix" values="0.3 0.3 0.3 0 0  0.3 0.3 0.3 0 0  0.3 0.3 0.3 0 0  0 0 0 0.8 0" />
           </filter>
-
         </defs>
       </svg>
 
@@ -49,26 +50,35 @@ export default function SkyBackground() {
       />
 
       {/* ═══════════════════════════════════════════════════
-           L3 — 星空层（仅夜间可见，display 由 --stars-display 控制）
+           闪烁星点 — 上半区域白色闪烁星点（仅夜间可见）
            ═══════════════════════════════════════════════════ */}
-      <svg
+      <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          display: "var(--stars-display)",
-          transition: "opacity 0.5s ease-in-out",
+          display: "var(--twinkling-stars-display)",
+          maskImage: "linear-gradient(to bottom, transparent 0px, transparent 80px, black 80px, black 100%)",
+          WebkitMaskImage: "linear-gradient(to bottom, transparent 0px, transparent 80px, black 80px, black 100%)",
         }}
       >
-        {stars.map((s, i) => (
-          <circle
+        {twinklingStars.map((s, i) => (
+          <div
             key={i}
-            cx={`${s.x}%`}
-            cy={`${s.y}%`}
-            r={s.r}
-            fill="var(--star-color)"
-            opacity={s.opacity}
+            className="absolute rounded-full"
+            style={{
+              left: `${s.x}%`,
+              top: `${s.y}%`,
+              width: `${s.size}px`,
+              height: `${s.size}px`,
+              background: "#ffffff",
+              opacity: s.baseOpacity,
+              animation: `twinkle ${s.duration}s ease-in-out infinite`,
+              animationDelay: `${s.delay}s`,
+              ["--twinkle-from" as string]: String(s.baseOpacity),
+              ["--twinkle-to" as string]: String(Math.min(s.baseOpacity + 0.35, 1)),
+            }}
           />
         ))}
-      </svg>
+      </div>
 
       {/* ═══════════════════════════════════════════════════
            L2 — 弥散光源（使用 CSS 变量，配合 blur 掩盖渐变切换）

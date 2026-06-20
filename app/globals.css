@@ -97,12 +97,16 @@ html, body {
   /* ── 正文 ── */
   --text-primary: rgba(255, 255, 255, 0.85);
   --text-secondary: rgba(255, 255, 255, 0.70);
+  --hero-desc-color: rgba(255, 255, 255, 0.70);
+  --hero-desc-weight: 500;
   --text-muted: rgba(255, 255, 255, 0.50);
+  --subtitle-color: #ffffff;
   --text-extra-muted: rgba(255, 255, 255, 0.35);
 
   /* ── 导航 ── */
-  --nav-text: rgba(255, 255, 255, 0.50);
-  --nav-hover: rgba(255, 255, 255, 0.85);
+  --nav-text: rgba(255, 255, 255, 0.85);
+  --nav-font-weight: 650;
+  --nav-hover: rgba(220, 200, 240, 0.88);
   --nav-underline: rgba(255, 255, 255, 0.40);
 
   /* ── 按钮 ── */
@@ -111,6 +115,7 @@ html, body {
   --btn-bg: rgba(255, 255, 255, 0.04);
   --btn-hover-bg: rgba(255, 255, 255, 0.15);
   --btn-hover-border: rgba(255, 255, 255, 0.6);
+  --footer-text: rgba(255, 255, 255, 0.28);
 
   /* ── 二维码气泡 ── */
   --bubble-bg: linear-gradient(
@@ -162,6 +167,16 @@ html, body {
   --star-color: rgba(255,255,255,0);
   --stars-display: none;
 
+  /* ── 闪烁星点 ── */
+  --twinkling-stars-display: none;
+
+  /* ── AI 状态灯（日间：暖橘呼吸） ── */
+  --status-dot-color: #FF9F43;
+  --status-dot-glow: rgba(255, 159, 67, 0.5);
+  --status-text-color: rgba(255, 255, 255, 0.35);
+  --capsule-bg: rgba(255, 159, 67, 0.06);
+  --capsule-border: rgba(255, 159, 67, 0.18);
+  --capsule-glow: rgba(255, 159, 67, 0.12);
 
 }
 
@@ -227,11 +242,15 @@ html, body {
   /* 正文 */
   --text-primary: rgba(200, 215, 240, 0.85);
   --text-secondary: rgba(195, 210, 240, 0.65);
+  --hero-desc-color: rgba(195, 210, 240, 0.65);
+  --hero-desc-weight: 500;
   --text-muted: rgba(180, 195, 230, 0.45);
+  --subtitle-color: rgba(255, 255, 255, 0.6);
   --text-extra-muted: rgba(170, 185, 220, 0.30);
 
   /* 导航 */
-  --nav-text: rgba(180, 195, 225, 0.45);
+  --nav-text: rgba(255, 255, 255, 0.85);
+  --nav-font-weight: 500;
   --nav-hover: rgba(210, 225, 250, 0.85);
   --nav-underline: rgba(190, 205, 240, 0.40);
 
@@ -288,11 +307,29 @@ html, body {
   --bg-cloud-color: rgba(160,185,230,0.06);
   --bg-cloud-display: block;
 
-  /* ── 星空 ── */
-  --star-color: rgba(220,230,255,0.3);
-  --stars-display: block;
+  /* ── 闪烁星点 ── */
+  --twinkling-stars-display: block;
+
+  /* ── AI 状态灯（夜间：冷蓝呼吸） ── */
+  --status-dot-color: #00D2FF;
+  --status-dot-glow: rgba(0, 210, 255, 0.55);
+  --status-text-color: rgba(180, 200, 240, 0.35);
+  --capsule-bg: rgba(0, 210, 255, 0.05);
+  --capsule-border: rgba(0, 210, 255, 0.15);
+  --capsule-glow: rgba(0, 210, 255, 0.10);
+
+  /* ── 弯月 ── */
+  --moon-display: block;
+
+}
 
 
+/* ══════════════════════════════════════════════════════
+   @keyframes — 闪烁星点
+   ══════════════════════════════════════════════════════ */
+@keyframes twinkle {
+  0%, 100% { opacity: var(--twinkle-from, 0.3); }
+  50% { opacity: var(--twinkle-to, 0.65); }
 }
 
 /* ══════════════════════════════════════════════════════
@@ -320,16 +357,320 @@ h1, h2, h3, h4, h5, h6, p, span, a, button, label, li, ul, ol {
   font-size: 13px;
   font-weight: 400;
   letter-spacing: 0.6px;
-  backdrop-filter: blur(8px);
-  background: var(--btn-bg);
+  background: transparent;
   cursor: pointer;
   font-family: 'Space Grotesk', sans-serif;
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
 }
 
 .btn-outline:hover {
-  background: var(--btn-hover-bg);
+  background: rgba(255, 255, 255, 0.15);
   color: #fff;
   border-color: var(--btn-hover-border);
+}
+
+/* ══════════════════════════════════════════════════════
+   导航栏 — 全局一体化毛玻璃（日/夜双模式）
+   ══════════════════════════════════════════════════════ */
+[data-theme="light"] header {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+[data-theme="dark"] header {
+  background: rgba(13, 17, 30, 0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* ══════════════════════════════════════════════════════
+   L.NaN 笔名 — 双轨渐变 / 终端光标 / Hover Glitch
+   ══════════════════════════════════════════════════════ */
+.logo-text {
+  position: relative;
+  display: inline-block;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  cursor: default;
+  transition: text-shadow 0.15s ease, transform 0.15s ease;
+}
+
+[data-theme="light"] .logo-text {
+  background-image: linear-gradient(90deg, #FF5E62 0%, #FF9966 100%);
+}
+
+[data-theme="dark"] .logo-text {
+  background-image: linear-gradient(90deg, #00F2FE 0%, #4FACFE 100%);
+}
+
+/* ── 终端光标 ::after ── */
+.logo-text::after {
+  content: "|";
+  display: inline;
+  margin-left: 5px;
+  font-weight: 300;
+  font-size: 20px;
+  -webkit-text-fill-color: var(--cursor-color);
+  animation: terminalBlink 1.2s step-end infinite;
+}
+
+[data-theme="light"] .logo-text::after {
+  --cursor-color: #FF9966;
+}
+
+[data-theme="dark"] .logo-text::after {
+  --cursor-color: #4FACFE;
+}
+
+@keyframes terminalBlink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+/* ── Hover Glitch 数字故障彩蛋 ── */
+.logo-text:hover {
+  animation: logoGlitch 0.3s ease;
+}
+
+@keyframes logoGlitch {
+  0%   { text-shadow: none;                transform: translateX(0);   }
+  15%  { text-shadow: -3px 0 #FF2D55, 3px 0 #32ADE6; transform: translateX(-2px); }
+  30%  { text-shadow: 3px 0 #FF2D55, -3px 0 #32ADE6; transform: translateX(2px);  }
+  45%  { text-shadow: -1.5px 0 #FF2D55, 1.5px 0 #32ADE6; transform: translateX(0);      }
+  60%  { text-shadow: 1.5px 0 #FF2D55, -1.5px 0 #32ADE6; transform: translateX(-1.5px);   }
+  75%  { text-shadow: -3px 0 #FF2D55;               transform: translateX(0.75px);   }
+  100% { text-shadow: none;                transform: translateX(0);   }
+}
+
+/* ══════════════════════════════════════════════════════
+   AI 状态灯 — 呼吸脉动 + 可点击跑数彩蛋
+   ══════════════════════════════════════════════════════ */
+@keyframes statusPulse {
+  0%, 100% {
+    box-shadow: 0 0 3px var(--status-dot-glow), 0 0 7px var(--status-dot-glow);
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 6px var(--status-dot-glow), 0 0 16px var(--status-dot-glow), 0 0 24px var(--status-dot-glow);
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes statusShake {
+  0%, 100% { transform: translateX(0); }
+  10%  { transform: translateX(-2px) translateY(0.5px); }
+  20%  { transform: translateX(2px) translateY(-0.5px); }
+  30%  { transform: translateX(-1.5px); }
+  40%  { transform: translateX(1.5px); }
+  50%  { transform: translateX(-1px); }
+  60%  { transform: translateX(1px); }
+  70%  { transform: translateX(-0.5px); }
+  80%  { transform: translateX(0.5px); }
+}
+
+@keyframes capsuleGlow {
+  0%, 100% {
+    box-shadow: 0 0 4px var(--capsule-glow), 0 0 8px var(--capsule-glow);
+  }
+  50% {
+    box-shadow: 0 0 8px var(--capsule-glow), 0 0 20px var(--capsule-glow), 0 0 32px var(--capsule-glow);
+  }
+}
+
+@keyframes nightConvergePulse {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(0, 210, 255, 0.65), 0 0 14px rgba(0, 210, 255, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 8px rgba(0, 210, 255, 0.78), 0 0 22px rgba(0, 210, 255, 0.48);
+  }
+}
+
+@keyframes entranceSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  cursor: pointer;
+  user-select: none;
+  background: var(--capsule-bg);
+  border: 1px solid var(--capsule-border);
+  box-shadow: 0 0 4px var(--capsule-glow), 0 0 8px var(--capsule-glow);
+  animation: capsuleGlow 4s ease-in-out infinite;
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.status-shake {
+  animation: statusShake 0.5s ease-out !important;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--status-dot-color);
+  box-shadow: 0 0 3px var(--status-dot-glow), 0 0 7px var(--status-dot-glow);
+  animation: statusPulse 3.2s ease-in-out infinite;
+  flex-shrink: 0;
+  transition: background 0.35s ease, box-shadow 0.35s ease;
+}
+
+.status-dot.day-aligned {
+  animation: dayAlignedPulse 4s ease-in-out infinite;
+  opacity: 1;
+  transform: scale(1);
+  background: #00E676;
+  box-shadow: 0 0 4px rgba(0, 230, 118, 0.5), 0 0 10px rgba(0, 230, 118, 0.25);
+}
+
+.status-dot.night-converged {
+  animation: nightConvergePulse 3s ease-in-out infinite;
+  opacity: 1;
+  transform: scale(1);
+  background: #00D2FF;
+  box-shadow: 0 0 5px rgba(0, 210, 255, 0.65), 0 0 14px rgba(0, 210, 255, 0.35);
+}
+
+.status-text {
+  font-family: 'SF Mono', 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  color: var(--status-text-color);
+  line-height: 1;
+  transition: color 0.35s ease;
+}
+
+/* ── 中央副标题（日夜双轨通透性） ── */
+.hero-subtitle {
+  opacity: 0.85;
+  animation: entranceSlideUp 0.6s ease-out backwards;
+  transition: color 0.5s ease-in-out, opacity 0.5s ease-in-out, text-shadow 0.5s ease-in-out;
+}
+
+[data-theme="light"] .hero-subtitle {
+  opacity: 0.85;
+  text-shadow: 0 1px 8px rgba(106, 76, 126, 0.38);
+}
+
+[data-theme="dark"] .hero-subtitle {
+  /* 保持莹蓝色原生质感，不叠加 blend */
+  opacity: 1;
+}
+
+/* ── 主标题：首屏渐显上移 ── */
+.hero-title {
+  animation: entranceSlideUp 0.6s ease-out 0.1s both;
+}
+
+/* ── 导航链接：日间隐形阴影防干扰 ── */
+.nav-link {
+  transition: color 0.5s ease-in-out, text-shadow 0.5s ease-in-out;
+}
+[data-theme="light"] .nav-link {
+  text-shadow: 0 1px 6px rgba(106, 76, 126, 0.45);
+}
+[data-theme="dark"] .nav-link {
+  text-shadow: none;
+}
+
+/* ── 主标题下方描述：日间隐形阴影 ── */
+.hero-desc {
+  animation: entranceSlideUp 0.6s ease-out 0.22s both;
+  transition: color 0.5s ease-in-out, text-shadow 0.5s ease-in-out;
+}
+[data-theme="light"] .hero-desc {
+  text-shadow: 0 1px 8px rgba(106, 76, 126, 0.38);
+}
+[data-theme="dark"] .hero-desc {
+  text-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .status-indicator {
+    display: none;
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   音频波形动画
+   ══════════════════════════════════════════════════════ */
+.audio-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin-right: 15px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  overflow: visible;
+}
+
+.audio-toggle:hover {
+  background: transparent;
+  border-color: transparent;
+}
+
+/* 音符 */
+.audio-note {
+  font-size: 14px;
+  line-height: 1;
+  user-select: none;
+  transition: color 0.5s ease-in-out, transform 0.15s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.audio-note.playing {
+  animation: noteWobble 1.2s ease-in-out infinite;
+}
+
+/* 暂停斜线 */
+.audio-note.paused::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 1.5px;
+  background: var(--btn-text);
+  border-radius: 0.75px;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  transition: background-color 0.5s ease-in-out;
+}
+
+@keyframes noteWobble {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25%  { transform: rotate(8deg) scale(1.12); }
+  50%  { transform: rotate(-5deg) scale(0.95); }
+  75%  { transform: rotate(6deg) scale(1.08); }
 }
 
 

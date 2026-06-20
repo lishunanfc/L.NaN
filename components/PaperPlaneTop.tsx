@@ -103,10 +103,10 @@ export default function PaperPlaneTop() {
       {/* 飞机 SVG — 淡粉→淡紫渐变 + 鼠标触碰旋转 */}
       <motion.div
         className="pointer-events-auto cursor-pointer"
-        animate={{ rotate: hovered ? [0, 360] : 0 }}
+        animate={{ rotate: hovered ? 360 : 0 }}
         transition={
           hovered
-            ? { duration: 3.5, repeat: Infinity, ease: "linear" }
+            ? { duration: 1.0, ease: "easeInOut" }
             : { duration: 0.4, ease: "easeOut" }
         }
         onHoverStart={() => setHovered(true)}

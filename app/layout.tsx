@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import BackgroundAudioProvider from "@/components/BackgroundAudio";
 
 export const metadata: Metadata = {
   title: "L.NaN · Aligns Human Intent",
@@ -16,15 +17,17 @@ export default function RootLayout({
       <head>
         {/* ═══════════════════════════════════════════════════
             防闪烁阻塞脚本 —— 在所有元素渲染前挂载 data-theme
-            localStorage > 系统偏好 > 默认 light
+            localStorage > 默认白天 light
             ═══════════════════════════════════════════════════ */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');t=t||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('theme')||'light';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,
           }}
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <BackgroundAudioProvider>{children}</BackgroundAudioProvider>
+      </body>
     </html>
   );
 }

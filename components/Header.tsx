@@ -1,30 +1,93 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import ThemeToggle from "./ThemeToggle";
+import { useAudio } from "./BackgroundAudio";
 
 export default function Header() {
   const [hovered, setHovered] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
+  const { isPlaying, isNight, togglePlay } = useAudio();
+
+  /* ── 状态灯点击彩蛋（日夜双轨状态隔离） ── */
+  const [dayAligned, setDayAligned] = useState(false);
+  const [nightConverged, setNightConverged] = useState(false);
+  const [lossDisplay, setLossDisplay] = useState("0.024");
+  const [statusAnim, setStatusAnim] = useState<"idle" | "shaking" | "scrambling">("idle");
+  const scrambleRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const handleStatusClick = useCallback(() => {
+    if (statusAnim !== "idle") return;
+
+    if (isNight) {
+      /* 夜间：Loss 跑数 → 莹蓝收敛 */
+      setStatusAnim("scrambling");
+      const startTime = Date.now();
+      scrambleRef.current = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        if (elapsed >= 800) {
+          clearInterval(scrambleRef.current!);
+          scrambleRef.current = null;
+          setLossDisplay("0.001");
+          setNightConverged(true);
+          setStatusAnim("idle");
+          return;
+        }
+        const raw = Math.random() * 0.06;
+        setLossDisplay(raw.toFixed(4));
+      }, 40);
+    } else {
+      /* 白天：Alignment 对齐 → 专属绿 */
+      setStatusAnim("shaking");
+      setTimeout(() => {
+        setDayAligned(true);
+        setStatusAnim("idle");
+      }, 500);
+    }
+  }, [isNight, statusAnim]);
+
+  /* 状态灯文本（日夜双轨） */
+  const statusText = (() => {
+    if (isNight) {
+      return `Loss: ${lossDisplay}`;
+    }
+    return dayAligned ? "Status: Aligned √" : "Status: Aligning...";
+  })();
+
+  /* 文本激活颜色：以当前主题为准，两个状态共存时按主题选 */
+  const statusTextStyle: React.CSSProperties = {};
+  if (isNight && nightConverged) statusTextStyle.color = "rgba(0, 210, 255, 0.6)";
+  else if (!isNight && dayAligned) statusTextStyle.color = "#00E676";
 
   return (
     <header className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-10 py-6">
       <div className="flex items-center gap-12">
+        <span className="logo-text">L.NaN</span>
+
+        {/* AI 系统运行状态灯 — 可点击跑数彩蛋 */}
         <span
-          className="text-sm font-medium tracking-[0.25em]"
-          style={{ color: "var(--text-muted)" }}
+          className={`status-indicator ${statusAnim === "shaking" ? "status-shake" : ""}`}
+          onClick={handleStatusClick}
         >
-          L.NaN
+          <span className={`status-dot${!isNight && dayAligned ? " day-aligned" : ""}${isNight && nightConverged ? " night-converged" : ""}`} />
+          <span
+            className="status-text"
+            style={statusTextStyle}
+          >
+            {statusText}
+          </span>
         </span>
+
         <nav className="flex gap-8">
           <a
             href="https://github.com/lishunanfc"
             target="_blank"
             rel="noopener noreferrer"
-            className="relative text-[13px] font-light tracking-[0.12em] cursor-pointer no-underline"
+            className="nav-link relative text-[16px] font-light tracking-[0.12em] cursor-pointer no-underline"
             style={{
               color: "var(--nav-text)",
+              fontWeight: "var(--nav-font-weight)",
             }}
             onMouseEnter={(e) => {
               (e.target as HTMLElement).style.color = "var(--nav-hover)";
@@ -39,9 +102,10 @@ export default function Header() {
             href="https://www.woshipm.com/u/1681210"
             target="_blank"
             rel="noopener noreferrer"
-            className="relative text-[13px] font-light tracking-[0.12em] cursor-pointer no-underline"
+            className="nav-link relative text-[16px] font-light tracking-[0.12em] cursor-pointer no-underline"
             style={{
               color: "var(--nav-text)",
+              fontWeight: "var(--nav-font-weight)",
             }}
             onMouseEnter={(e) => {
               (e.target as HTMLElement).style.color = "var(--nav-hover)";
@@ -56,6 +120,20 @@ export default function Header() {
       </div>
 
       <div className="relative flex items-center">
+        {/* 音频播放/静音按钮 —— 仅夜晚显示 */}
+        {isNight && (
+          <button
+            className="audio-toggle"
+            onClick={togglePlay}
+            aria-label={isPlaying ? "静音" : "播放背景音乐"}
+            title={isPlaying ? "静音" : "播放背景音乐"}
+          >
+            <span className={`audio-note ${isPlaying ? "playing" : "paused"}`}>
+              &#9835;
+            </span>
+          </button>
+        )}
+
         {/* 日夜切换按钮 */}
         <ThemeToggle />
 
